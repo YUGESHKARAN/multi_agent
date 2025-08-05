@@ -1,0 +1,22 @@
+langchain_huggingface
+langchain
+python-dotenv
+# pinecone-client
+langchain-groq
+langchain-community
+langchain-pinecone
+langchain_core
+langsmith
+flask
+flask-cors
+sentence-transformers
+pydantic
+
+pymongo[srv]
+pymongo
+langchain_openai
+boto3
+serpapi
+
+langgraph
+tiktoken
