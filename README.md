@@ -121,8 +121,25 @@ pip install -r requirements.txt
 
 ### 3. Configure Environment
 
-- Set up environment variables as needed for MongoDB and Pinecone integrations.
-- Refer to the respective agent repositories for detailed configuration.
+Create a `.env` file in the root directory with the following variables:
+
+```env
+GROQ_API_KEY=
+OPENAI_API_KEY=
+HUGGINGFACE_API_KEY=
+MONGODB_URI=
+PINECONE_API_KEY=
+BUCKET_NAME=
+BUCKET_REGION=
+ACCESS_KEY=
+SECRET_ACCESS_KEY=
+SERPAPI_API_KEY=
+UNSPLASH_ACCESS_KEY=
+```
+
+**Note:**  
+- Obtain these keys/tokens from the respective service dashboards.
+- The `.env` file is required for the agents and integrations to function.
 
 ### 4. Run the Multi-Agent System
 
