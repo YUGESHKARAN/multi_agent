@@ -49,8 +49,6 @@ def mogodb_query_generator(db):
     Write only the MongoDB query and nothing else. Do not wrap the query in any other text, not even backticks.
 
     Gerneral example:
-
-    For example:
     Question: Show all the products ?
     MongoDB Query: collection.find({{"email": {email}}}, {{"productDetails": 1, "_id": 0}})
 

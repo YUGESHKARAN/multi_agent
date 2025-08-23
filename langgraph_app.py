@@ -1,68 +1,94 @@
-# langgraph_app.py
+
 
 import os
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableLambda
+# from langchain_core.runnables import RunnableLambda
 from pydantic import BaseModel
-from langchain_core.messages import AIMessage, HumanMessage
-from typing import List, Optional, Union
+from typing import List, Optional
+from langchain_core.messages import BaseMessage
 
+# Load environment variables
 load_dotenv()
 
-# ─── Imports ────────────────────────────────────────────────────────────────────
+# -------------------- Mongo Agent Import --------------------
 from agents.mongo_agent import response_generator, db
+
+# -------------------- Pinecone Agent Import --------------------
 from agents.pinecone_agent import query_documents
+
+# -------------------- LLM Router Setup --------------------
 from langchain_groq import ChatGroq
-from langchain_openai import ChatOpenAI
 
+llm_router = ChatGroq(model="llama-3.3-70b-versatile")
 
-# ─── Router LLM Setup ─────────────────────────────────────────────────────────
-# llm_router = ChatGroq(model="llama-3.3-70b-versatile")
-llm_router = ChatOpenAI(model_name="gpt-4.1")
 router_prompt = PromptTemplate.from_template("""
-You are a tool router. Pick exactly one tool name: "mongo" or "pinecone".
+You are a tool router. Your job is to pick one tool name only.
 
-- mongo: product/user DB CRUD
-- pinecone: document-based RAG
+Available tools:
+- "product_agent": For user data, products, inserting or updating MongoDB entries.
+- "pinecone_agent": For questions about documents or needing RAG over uploaded documents.
 
-Return exactly one word and nothing else.
+ONLY return one word: "product_agent" or "pinecone_agent". No explanation.
 
 Question: {question}
 Tool:
 """)
+
 router_chain = router_prompt | llm_router | StrOutputParser()
 
-# ─── State Schema ──────────────────────────────────────────────────────────────
+# -------------------- Define State --------------------
 class AppState(BaseModel):
     question: str
     email: str
-    chat_history: Optional[List[Union[HumanMessage, AIMessage]]] = []
-
+    chat_history: Optional[List[BaseMessage]] = []
     answer: Optional[str] = None
+    route: Optional[str] = None
 
-# ─── Master Node (router + agents) ─────────────────────────────────────────────
-def master_fn(state: AppState):
-    tool = router_chain.invoke({"question": state.question}).strip().lower()
-    if tool == "mongo":
-        out = response_generator(
-            user_query=state.question,
-            email=state.email,
-            db=db,
-            chat_history=state.chat_history or []
-        )
-    else:  # pinecone
-        out = query_documents(state.question)
-    return {"answer": out}
+# -------------------- Router Function --------------------
+def router_fn(state: AppState) -> dict:
+    tool = router_chain.invoke({"question": state.question})
+    return {"route": tool.strip().lower()}
 
-master_node = RunnableLambda(master_fn)
+# -------------------- Mongo Agent as Runnable --------------------
+def mongo_agent(state: AppState)-> dict:
 
-# ─── Graph Assembly ────────────────────────────────────────────────────────────
+    return {"answer": response_generator(
+        user_query=state.question,
+        email=state.email,
+        db=db,
+        chat_history=state.chat_history or []
+    )}
+
+# -------------------- Pinecone_agent Agent as Runnable --------------------
+def pinecone_agent(state: AppState) -> dict:
+     return {"answer": query_documents(state.question)}
+    
+
+
+# -------------------- Graph Assembly --------------------
 graph = StateGraph(AppState)
-graph.add_node("master", master_node)
-graph.set_entry_point("master")
-graph.add_edge("master", END)
 
+graph.add_node("supervisor", router_fn)
+graph.add_node("product_agent", mongo_agent)
+graph.add_node("pinecone_agent", pinecone_agent)
+
+graph.set_entry_point("supervisor")
+
+# ✅ Correct usage: use router_fn as second arg (not string)
+graph.add_conditional_edges(
+    "supervisor",
+    lambda state: state.route,  # use the route field
+    {
+        "product_agent": "product_agent",
+        "pinecone_agent": "pinecone_agent"
+    }
+)
+
+graph.add_edge("product_agent", END)
+graph.add_edge("pinecone_agent", END)
+
+# -------------------- Compile Graph --------------------
 app_graph = graph.compile()

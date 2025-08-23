@@ -1,7 +1,6 @@
 langchain_huggingface
 langchain
 python-dotenv
-# pinecone-client
 langchain-groq
 langchain-community
 langchain-pinecone
@@ -20,3 +19,4 @@ serpapi
 
 langgraph
 tiktoken
+zappa 

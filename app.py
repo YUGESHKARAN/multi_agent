@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from langchain_core.messages import AIMessage, HumanMessage
 
+# from langsmith import traceable
+
 from langgraph_app import app_graph
 
 app = Flask(__name__)
@@ -27,8 +29,6 @@ def main():
             "email": user_email,
             "chat_history": chat_history
         })
-        # print(f"Query: {user_query}")
-        # print(f"Response: {response}")
 
         if response:
             answer = response.get("answer", "")
