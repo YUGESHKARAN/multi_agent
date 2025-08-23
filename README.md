@@ -46,6 +46,16 @@ Welcome to the **Multi-Agent** repository! This project leverages the [LangGraph
 
 ---
 
+## 🕸️ Multi-Agent Graph
+
+Below is a visual representation of the agent orchestration graph:
+
+![Multi-Agent Graph](assets/multi_agent_graph.png)
+
+> _Supervisor node dynamically routes user queries to either the `pinecone_agent` (for RAG/document tasks) or the `product_agent` (for MongoDB/product tasks), then ends the flow._
+
+---
+
 ## 🏗️ Architecture Overview
 
 ### 🧭 Tool Router
@@ -175,3 +185,10 @@ For questions, suggestions, or support, reach out via [GitHub Issues](https://gi
 ---
 
 **Empowering AI with smart, context-aware multi-agent orchestration!** 🚦🤝🤖
+
+---
+
+### 📊 Multi-Agent Graph
+
+![Multi-Agent Graph](https://user-images.githubusercontent.com/your-username/path-to-uploaded-image.png)
+<!-- Replace with actual path if committed to the repo, or keep as reference for local/remote documentation -->
