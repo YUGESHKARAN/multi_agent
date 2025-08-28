@@ -19,8 +19,8 @@ load_dotenv()
 # Set API keys
 # os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
 os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
-os.environ['MONGODB_URI'] = os.getenv('MONGODB_URI')
-
+mondbURI = os.getenv('MONGODB_URI')
+db_name= os.getenv('db_name')
 
 # app = Flask(__name__)
 
@@ -28,8 +28,8 @@ os.environ['MONGODB_URI'] = os.getenv('MONGODB_URI')
 
 
 db = MongoDBDatabase(
-    uri=os.environ['MONGODB_URI'],
-    db_name="JWT-AUTH"  # ✅ Correct argument name
+    uri=mondbURI,
+    db_name=db_name  # ✅ Correct argument name
 )
 chat_history = []
 

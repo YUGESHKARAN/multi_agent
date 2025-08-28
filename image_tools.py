@@ -33,7 +33,7 @@ def search_and_download_image(query):
         "tbm": "isch",
         "engine": "google",
         "ijn": "0",
-        "api_key": os.getenv("SERPAPI_API_KEY"),
+        "api_key": os.getenv("SERP_API_KEY"),
     }
 
     res = requests.get("https://serpapi.com/search.json", params=params)
